@@ -15,6 +15,7 @@ from app.services.google_api import (
 
 router = APIRouter()
 
+
 @router.post(
     '/',
     response_model=list[CharityProjectDB],
