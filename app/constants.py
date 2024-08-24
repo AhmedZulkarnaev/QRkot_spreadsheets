@@ -1,0 +1,4 @@
+DATE_TIME_FORMAT = "%Y/%m/%d %H:%M:%S"
+COLUMNS = 5
+ROWS = 100
+RANGE = 'A1:C30'
