@@ -18,47 +18,39 @@ async def get_not_full_invested_objects(
     return objects.scalars().all()
 
 
-async def close_donation_for_obj(obj_in: Union[CharityProject, Donation]):
+def close_donation_for_obj(obj_in: Union[CharityProject, Donation]):
     obj_in.invested_amount = obj_in.full_amount
     obj_in.fully_invested = True
     obj_in.close_date = datetime.now()
     return obj_in
 
 
-async def invest_money(
-    obj_in: Union[CharityProject, Donation],
-    obj_model: Union[CharityProject, Donation],
-) -> Union[CharityProject, Donation]:
-    free_amount_in = obj_in.full_amount - obj_in.invested_amount
-    free_amount_in_model = obj_model.full_amount - obj_model.invested_amount
+def invest_money(
+    target: Union[CharityProject, Donation],
+    sources: List[Union[CharityProject, Donation]]
+) -> List[Union[CharityProject, Donation]]:
+    for source in sources:
+        free_amount_target = target.full_amount - target.invested_amount
+        free_amount_source = source.full_amount - source.invested_amount
+        if free_amount_target >= free_amount_source:
+            target.invested_amount += free_amount_source
+            close_donation_for_obj(source)
+            if free_amount_target == free_amount_source:
+                close_donation_for_obj(target)
+                break
+        else:
+            source.invested_amount += free_amount_target
+            close_donation_for_obj(target)
+            break
 
-    if free_amount_in > free_amount_in_model:
-        obj_in.invested_amount += free_amount_in_model
-        await close_donation_for_obj(obj_model)
-
-    elif free_amount_in == free_amount_in_model:
-        await close_donation_for_obj(obj_in)
-        await close_donation_for_obj(obj_model)
-
-    else:
-        obj_model.invested_amount += free_amount_in
-        await close_donation_for_obj(obj_in)
-
-    return obj_in, obj_model
+    return sources
 
 
-async def investing_process(
-    obj_in: Union[CharityProject, Donation],
-    model_add: Union[CharityProject, Donation],
-    session: AsyncSession,
-) -> Union[CharityProject, Donation]:
-    objects_model = await get_not_full_invested_objects(model_add, session)
+def investing_process(
+    target: Union[CharityProject, Donation],
+    sources: List[Union[CharityProject, Donation]],
+) -> List[Union[CharityProject, Donation]]:
+    updated_sources = invest_money(target, sources)
+    return updated_sources
 
-    for model in objects_model:
-        obj_in, model = await invest_money(obj_in, model)
-        session.add(obj_in)
-        session.add(model)
-
-    await session.commit()
-    await session.refresh(obj_in)
-    return obj_in
+# Ерунду какую то сделал)
