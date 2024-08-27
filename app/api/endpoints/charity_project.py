@@ -32,7 +32,8 @@ async def create_charity_project(
 ):
     await check_name_duplicate(charity_project.name, session)
     new_project = await charity_project_crud.create(charity_project, session)
-    not_full_invested_donations = await get_not_full_invested_objects(Donation, session)
+    not_full_invested_donations = await get_not_full_invested_objects(
+        Donation, session)
     updated_donations = investing_process(
         new_project, not_full_invested_donations)
     for donation in updated_donations:
@@ -42,7 +43,6 @@ async def create_charity_project(
     await session.refresh(new_project)
 
     return new_project
-
 
 
 @router.get(

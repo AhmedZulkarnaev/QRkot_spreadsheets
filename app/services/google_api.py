@@ -6,7 +6,12 @@ from aiogoogle import Aiogoogle
 from app.models import CharityProject
 from app.core.config import settings
 from app.constants import DATE_TIME_FORMAT
-from app.services.utils import create_spreadsheet_body, create_table_values, get_sheet_dimensions, will_data_fit
+from app.services.utils import (
+    create_spreadsheet_body,
+    create_table_values,
+    get_sheet_dimensions,
+    will_data_fit
+)
 
 
 async def spreadsheets_create(wrapper_services: Aiogoogle) -> str:
